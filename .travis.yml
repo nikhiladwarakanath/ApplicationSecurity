@@ -1,1 +1,6 @@
-language: java
+install: make get-deps
+compiler:
+  - clang
+  - gcc
+before_install:
+  - test -n $CC && unset CC
