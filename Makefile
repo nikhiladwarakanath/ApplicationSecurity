@@ -1,3 +1,4 @@
+CC=gcc
 default: prog
 
 get-deps:
