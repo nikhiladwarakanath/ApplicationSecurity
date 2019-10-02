@@ -15,7 +15,7 @@ bool load_dictionary(const char *dictionary_file, hashmap_t hashtable[])
     {
         hashtable[i] = NULL;
     }
-    //printf("inside load dictionary \n");
+    printf("inside load dictionary \n");
     FILE *fp = fopen(dictionary_file, "r");
     if (fp == NULL)
     {
@@ -51,7 +51,7 @@ bool load_dictionary(const char *dictionary_file, hashmap_t hashtable[])
         else
             continue;
     }
-    //printf("loaded \n");
+    printf("loaded \n");
     fclose(fp);
     return true;
 }
@@ -100,20 +100,20 @@ int check_words(FILE *fp, hashmap_t hashtable[], char *misspelled[])
                     else{
                         free(trimmed);
                     }
-                   
+                    
                 }
                 else{
                     free(trimmed);
                 }
-               
+                
                 lineSplit = strtok(NULL, " ");
             }
 
-           
+            
         }
         else
         {
-            //printf("NO");
+            printf("NO");
         }
         free(lineSplit);
         //free(hashtable);

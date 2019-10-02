@@ -11,6 +11,8 @@
 #define DICTIONARY "wordlist.txt"
 #define BODICTIONARY "bo_wordlist.txt"
 #define MAX_MISSPELLED 1000
+void freeMisspelled(char * misspelled[],int len);
+void freeMap(hashmap_t hashtable[]);
 int main(int argc, char** argv) {
     hashmap_t hashtable[HASH_SIZE];
     if (argc < 3) {
@@ -26,5 +28,29 @@ int main(int argc, char** argv) {
     int num_wrong = check_words(fp, hashtable, misspelled);
     for (int i = 0; i < num_wrong; i++) {
         printf("%s\n", misspelled[i]);
+    }
+    fclose(fp);
+    //free(dictionary);
+    freeMap(hashtable);
+    freeMisspelled(misspelled, num_wrong);
+    return 0;
+}
+
+void freeMap(hashmap_t hashtable[]){
+    int i;
+    for(i=0;i<HASH_SIZE;i++){
+        hashmap_t ptr = hashtable[i];
+        while(ptr != NULL){
+            hashmap_t curr = ptr;
+            ptr = ptr-> next;
+            free(curr);
+        }
+    }
+}
+
+void freeMisspelled(char * misspelled[],int len){
+    int i;
+    for(i=0;i<len;i++){
+        free(misspelled[i]);
     }
 }
