@@ -161,7 +161,7 @@ char *trim(char *string_input)
     for (int i = 0; i < strlen(string_input); i++)
     {
 
-        if (isalpha(string_input[i]))
+        if (isalnum(string_input[i]))
         {
 
             removeFromStart = i;
@@ -170,11 +170,11 @@ char *trim(char *string_input)
     }
 
     // Count end punctuation.
-    int removeFromEnd = 0;
+    int removeFromEnd = strlen(string_input)-1;
     for (int j = strlen(string_input) - 1; j >= 0; j--)
     {
 
-        if (isalpha(string_input[j]))
+        if (isalnum(string_input[j]))
         {
 
             removeFromEnd = j;
@@ -190,11 +190,11 @@ char *trim(char *string_input)
     //     return "";
     // }
     // // All characters were punctuation.
-    // if (removeFromStart == strlen(string_input) &&
-    //     removeFromEnd == strlen(string_input))
-    // {
-    //     return "";
-    // }
+    if (removeFromStart == strlen(string_input) -1 &&
+        removeFromEnd == 0)
+    {
+        return "";
+    }
     // // Substring.
 
     //strncpy(finals, removeFromStart, removeFromEnd);
@@ -222,7 +222,7 @@ char *substring(char *fullString, int posStart, int length)
         }
     }
     output[c] = '\0';
-
+    //printf("\nsub string is %s\n", output);
     return output;
 }
 
