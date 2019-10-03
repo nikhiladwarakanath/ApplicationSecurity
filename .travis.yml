@@ -3,7 +3,7 @@ compiler:
   - gcc
 script:
   - gcc -Wall spell.c dictionary.c main.c -o spell
-  - ./spell test1.txt wordlist.txt
+  - ./spell taleOfTwoCities.txt wordlist.txt
 
 after-success:
   - bash <("success")

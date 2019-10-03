@@ -62,11 +62,11 @@ int check_words(FILE *fp, hashmap_t hashtable[], char *misspelled[])
     int num_misspelled = 0, num_store = 0;
     //FILE *fpr = fopen(fp, "r");
     char LINE[100];
-    //char *pos = 0;
+    
 
     while (fgets(LINE, 100, fp) != NULL)
     {
-        //trimmed = strtok(LINE, "\n");
+        
         //printf("%s \n", LINE);
         char *lineSplit = strtok(LINE, " ");
         //printf("%s:%d \n", lineSplit, strlen(lineSplit));
@@ -74,8 +74,7 @@ int check_words(FILE *fp, hashmap_t hashtable[], char *misspelled[])
         {
             while (lineSplit != NULL)
             {
-                //printf("%s \n", lineSplit);
-                //lineSplit = strtok(lineSplit, "\n");
+                //printf("%s \n", lineSplit);                
                 char *trimmed = trim(lineSplit);
                 //printf("trimming punctuation %s, %d \n", lineSplit, strlen(lineSplit));
                 if (strlen(trimmed) > 0)
@@ -113,7 +112,7 @@ int check_words(FILE *fp, hashmap_t hashtable[], char *misspelled[])
         }
         else
         {
-            printf("NO");
+            //printf("NO");
         }
         free(lineSplit);
         //free(hashtable);
@@ -126,23 +125,23 @@ int check_words(FILE *fp, hashmap_t hashtable[], char *misspelled[])
 
 bool check_word(const char *word, hashmap_t hashtable[])
 {
-    char temp[LENGTH + 1];
-    int len = strlen(word);
+    char lowerString[LENGTH + 1];
+    int lengths = strlen(word);
     int i = 0;
-    for (i = 0; i < len; i++)
+    for (i = 0; i < lengths; i++)
     {
-        temp[i] = tolower(word[i]);
+        lowerString[i] = tolower(word[i]);
     }
-    temp[len] = '\0';
+    lowerString[lengths] = '\0';
     //printf("inside checkword \n");
-    int bucket = hash_function(temp);
+    int bucket = hash_function(lowerString);
     //printf("bucket value, %d \n", bucket);
     node *ptrToHash = hashtable[bucket];
 
     while (ptrToHash != NULL)
     {
         //printf(" word %d      ptrtohas %d ",strlen(word), strlen(ptrToHash-> word));
-        if (strcmp(temp, ptrToHash->word) == 0)
+        if (strcmp(lowerString, ptrToHash->word) == 0)
         {
             //printf("success \n");
             return true;
