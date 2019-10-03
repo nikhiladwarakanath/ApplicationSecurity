@@ -189,11 +189,11 @@ char *trim(char *string_input)
     //     return "";
     // }
     // // All characters were punctuation.
-    if (removeFromStart == strlen(string_input) -1 &&
-        removeFromEnd == 0)
-    {
-        return "";
-    }
+    // if (removeFromStart == strlen(string_input) -1 &&
+    //     removeFromEnd == 0)
+    // {
+    //     return "";
+    // }
     // // Substring.
 
     //strncpy(finals, removeFromStart, removeFromEnd);
