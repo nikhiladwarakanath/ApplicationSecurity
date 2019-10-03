@@ -112,9 +112,9 @@ int check_words(FILE *fp, hashmap_t hashtable[], char *misspelled[])
         }
         else
         {
-           continue; //printf("NO");
+           free(lineSplit); //printf("NO");
         }
-        free(lineSplit);
+        
         //free(hashtable);
 
         //free(pos);
