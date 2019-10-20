@@ -1,8 +1,18 @@
-from flask import Flask, render_template, request, json
-import os
+from flask import Flask, render_template, request, json, redirect, url_for
+import os.path
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
+app.url_map.strict_slashes = False
+
+UPLOAD_FOLDER = '/home/nikhila/uploads/'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER 
+
+
+@app.route('/home',methods = ['GET', 'POST'])
+def home(): 
+    return render_template('home.html')
 
 @app.route("/register", methods=['GET'])
 def regget():
@@ -39,6 +49,7 @@ def loginget():
     return render_template('login.html')
 
 
+
 @app.route("/login", methods=['POST'])
 def loginpost():
     _name = request.form['username']
@@ -47,19 +58,46 @@ def loginpost():
     if _name and _pword:
         with open('userList.json') as json_file:
             data = json.load(json_file)
-            print(len(data))
+            #print(len(data))
             for i in data:
                 if i['username'] == _name and i['password'] == _pword and i['2fa'] == _2fa:
-                    return "logged"
+                    return url_for('spellCheck')
+                    #return "logged"
         return "incorrect"
     else:
         return "FFF"
 
 
-@app.route("/spellcheck")
+@app.route("/spellcheck", methods=['GET'])
 def spellCheck():
-    return "Spell Check"
+    return render_template('spellCheck.html')
+
+
+@app.route("/spellcheck", methods=['POST'])
+def spellCheckPost():
+    print("inside spell post")
+    file = request.files['file']
+    print(file)
+    if file:
+            #filename = secure_filename(file.filename)
+            print("exist")
+            if file.filename == '':
+                flash('No selected file')
+                return redirect(request.url)
+            if file:
+                filename = secure_filename(file.filename)
+                print(filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                # paths = os.path.join(UPLOAD_FOLDER, filename)
+                # try:
+                #     fp = open(paths)
+                # except IOError and FileNotFoundError:
+                # # If not exists, create the file
+                #     fileUpload = open(paths, "w")
+                #     fileUpload.write(file.read())
+    return "yes"
+
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True,port=5000, host="0.0.0.0")
