@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, json, redirect, url_for
 import os.path
+import sys
+import subprocess
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -76,26 +78,35 @@ def spellCheck():
 @app.route("/spellcheck", methods=['POST'])
 def spellCheckPost():
     print("inside spell post")
-    file = request.files['file']
-    print(file)
-    if file:
-            #filename = secure_filename(file.filename)
-            print("exist")
-            if file.filename == '':
-                flash('No selected file')
-                return redirect(request.url)
-            if file:
-                filename = secure_filename(file.filename)
-                print(filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                # paths = os.path.join(UPLOAD_FOLDER, filename)
-                # try:
-                #     fp = open(paths)
-                # except IOError and FileNotFoundError:
-                # # If not exists, create the file
-                #     fileUpload = open(paths, "w")
-                #     fileUpload.write(file.read())
-    return "yes"
+    text = request.form['text']
+    # print(text)
+
+    f = open('tmp.txt','w+')
+    f.write(text)
+    f.close()
+
+    fr = open('tmp.txt','r')
+    misspelled = None
+    # print(fr.read())
+    wl = os.path.abspath('wordList.txt')
+    # print(wl)
+    tl = os.path.abspath('tmp.txt')
+    # sc = os.path.abspath('spell_check')
+    outFile = open('Output.txt', 'ab+')
+
+    try:
+        os.chdir('/home/nikhila/My Stuff/AppSec/ApplicationSecurity/Assignment-2/WebRoot/')
+        cmd = ['./spell_check', 'tmp.txt','wordlist.txt']
+        p = subprocess.check_output(cmd,stderr=subprocess.PIPE)
+        misspelled = p
+        print(misspelled)
+        outFile.write(misspelled)
+        outFile.close()
+    except OSError as e:
+        print("error %s" % e.strerror)
+    
+    fr.close()
+    return misspelled
 
 
 
