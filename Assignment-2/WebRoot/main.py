@@ -4,14 +4,11 @@ import sys
 import subprocess
 from werkzeug.utils import secure_filename
 
-app = Flask(__name__,template_folder="templates/static")
+app = Flask(__name__, template_folder="templates/static")
 
 app.url_map.strict_slashes = False
-app.secret_key = "temp"  
+app.secret_key = "temp"
 app._static_folder = os.path.abspath("templates/static/")
-
-
-
 
 
 @app.route('/home', methods=['GET', 'POST'])
@@ -59,7 +56,7 @@ def loginpost():
     _name = request.form['username']
     _pword = request.form['password']
     _2fa = request.form['2fa']
-    result=""
+    result = ""
     if _name and _pword:
         with open('userList.json') as json_file:
             data = json.load(json_file)
@@ -67,14 +64,14 @@ def loginpost():
             for i in data:
                 if i['username'] == _name and i['password'] == _pword and i['2fa'] == _2fa:
                     session['username'] = request.form['username']
-                    result ="success"
+                    result = "success"
                     return redirect(url_for('spellCheck'))
                     # return "logged"
                 else:
-                    result ="failure"
-                    return render_template("layouts/login.html", result=result)    
+                    result = "failure"
+                    return render_template("layouts/login.html", result=result)
     else:
-        result ="failure"
+        result = "failure"
         return render_template("layouts/login.html", result=result)
 
 
@@ -106,7 +103,7 @@ def spellCheckPost():
 
         try:
             os.chdir(
-            '/home/nikhila/My Stuff/AppSec/ApplicationSecurity/Assignment-2/WebRoot/')
+                '/home/nikhila/My Stuff/AppSec/ApplicationSecurity/Assignment-2/WebRoot/')
             cmd = ['./spell_check', 'tmp.txt', 'wordlist.txt']
             p = subprocess.check_output(cmd, stderr=subprocess.PIPE)
             misspelled = p
@@ -121,13 +118,14 @@ def spellCheckPost():
         return misspelled
 
     return "You are not logged in <br><a href = '/login'></b>" + "click here to log in</b></a>"
-    
+
 
 @app.route("/logout", methods=['GET'])
 def logout():
     session.pop('username', None)
     # return "logged out"
     return url_for('loginget')
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000, host="0.0.0.0")
