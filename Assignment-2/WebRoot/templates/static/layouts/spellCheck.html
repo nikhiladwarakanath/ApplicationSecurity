@@ -5,6 +5,7 @@
         <textarea name='text'cols="80" rows="15" ></textarea>
         <button>Submit </button>
     </form>
+    <button id ='logout'>Logout</button>
     <script>
         $("#myForm").submit(function (event) {
 
@@ -28,5 +29,24 @@
             });
             return false;
         });
+        $(function(){
+            $("#logout").on('click',function () {
+            var tmp = "inside";
+            //alert(tmp);
+            $.ajax({
+                url:'/logout',
+                type:'GET',
+                contentType:false,
+                processData:false,
+                success:function(data){
+                    // alert(data);
+                    // console.log(data);
+                    window.location.href = data;
+                }
+            });
+            return false;
+        });
+        });
+      
     </script>
 </body>

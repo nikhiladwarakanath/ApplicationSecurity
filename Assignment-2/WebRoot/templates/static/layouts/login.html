@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <link href="/static/css/styleslogin.css" rel="stylesheet" type="text/css" >
+</head>
+<body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    </style>
+    <div class='temp'>
+        <form class="multi-form" method="POST">
+            <fieldset>
+                <h2 class="fs-title">User Login</h2>
+                <h3 class="fs-subtitle">Enter your information</h3>
+                <input type="text" name="username" id="uname" placeholder="Username:" />
+                <input type="password" name="password" id="pword" placeholder="Password" />
+                <input type="text" name="2fa" id="2fa" placeholder="2-Factor Authentication" />
+                <input class="action-button" type="submit" value="Login" id="login" />
+            </fieldset>
+            
+
+        </form>
+
+        <div id = "result" hidden=true>
+           {{result}} 
+        </div>
+        <div class='temp2'>
+            <input class="action-button" type="button" value="Register" id="Register"/>
+        </div>
+    </div>
+    <script src="/static/js/login.js">
+        
+    </script>
+
+</body>
+</html>

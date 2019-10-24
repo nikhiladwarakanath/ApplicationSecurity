@@ -1,0 +1,28 @@
+<body>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <head>
+      <link href="/static/css/stylesregister.css" rel="stylesheet" type="text/css" >
+  </head>
+   <div>
+    <form class="multi-form" method="POST">
+      <fieldset>
+        <h2 class="fs-title">User Registration</h2>
+        <h3 class="fs-subtitle">Enter your information</h3>
+        <input type="text" name="username" id="uname" placeholder="Username:" />
+        <input type="password" name="password" id="pword" placeholder="Password" />
+        <input type="text" name="2fa" id="2fa" placeholder="2-Factor Authentication" />
+        <input class="action-button" type="submit" value="Register" id="register"/>
+      </fieldset>
+
+
+
+    </form>
+    
+      {%if result%}
+      <p id="result" hidden>{{result}}</p>
+      {%endif%}
+    
+  </div>
+  <script src="/static/js/register.js">
+  </script>
+</body>
