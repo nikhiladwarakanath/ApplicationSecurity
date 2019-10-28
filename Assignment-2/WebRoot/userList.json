@@ -9,4 +9,4 @@
         "password": "$2b$12$LxqDpYn/YnsjwEFhVBBno.BbBfhwTV.HNvQefH9okI.I2NG5.Bn/S",
         "username": "hi"
     }
-,{"2fa": "bridge", "password": "$2b$12$D4D7EC2sxC9YCmd5mQiWxOXLKylWK4ukPMpsokCT3lbh9ahqSWgVO", "username": "bridge"},{"2fa": "17572028962", "password": "$2b$12$g8tD1nLRqRVd3aIWU0JAKOKa0Y1BFJSMYc4mfw6F/cdRr4u.iOxWi", "username": "spellchecktest"}]
+,{"2fa": "bridge", "password": "$2b$12$D4D7EC2sxC9YCmd5mQiWxOXLKylWK4ukPMpsokCT3lbh9ahqSWgVO", "username": "bridge"},{"2fa": "17572028962", "password": "$2b$12$g8tD1nLRqRVd3aIWU0JAKOKa0Y1BFJSMYc4mfw6F/cdRr4u.iOxWi", "username": "spellchecktest"},{"2fa": "kin", "password": "$2b$12$vzKgp4KwaasKms9cXroTe.04m8F.I1VitgCu/Ro6POGnDTQQbEPAW", "username": "kin"},{"2fa": "link", "password": "$2b$12$wlo5Zs.oXbUJpKbN1Vw/pOXJRJxJlZNXxeSB5oREzJkWnAawwdWUq", "username": "link"}]

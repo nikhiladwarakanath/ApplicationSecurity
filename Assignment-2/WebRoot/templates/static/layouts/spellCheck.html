@@ -1,9 +1,13 @@
-<body>
+<head>
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self';
+        script-src 'self' https://code.jquery.com; style-src 'self'">
+</head><body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     Upload the text you want to run the spell checker against
     <form id="myForm" enctype="multipart/form-data" method="POST">
         <textarea name='text' cols="80" rows="15" id ='inputtext'></textarea>
         <input type="submit" value="Submit"/>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     </form>
     <div id="result">
         <p> Misspelled words are:</p>
