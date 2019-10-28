@@ -10,7 +10,7 @@ $(function () {
         }
     });
 
-    var result = document.getElementById("success").innerHTML;
+    var result = document.getElementById("success").innerText;
     //alert(result);
  
     if (result != "" && result != undefined && result!="none") {

@@ -31,7 +31,6 @@ def home():
 @app.route("/register", methods=['GET'])
 def regget():
     reg = make_response(render_template('/layouts/register.html', result="none"))
-    # reg.headers['Content-Security-Policy']='default-src \'self\'' 
     reg.headers['X-XSS-Protection'] = '1; mode=block'
     return reg
 
@@ -42,10 +41,7 @@ def reg():
     _name = request.form['username']
     _pword = request.form['password']
     _2fa = request.form['2fa']
-    print(_pword)
-    print(_name)
-    print(type(_name))
-    print(type(_pword))
+    
     if _name and _pword:
         with open('userList.json', mode='a+', encoding='utf-8') as userJSON:
             userJSON.seek(0, os.SEEK_END)
@@ -77,23 +73,18 @@ def loginpost():
     _pword = request.form['password']
     print(_pword)
     _2fa = request.form['2fa']
-    # //result = ""
+    
     if _name and _pword:
         with open('userList.json') as userJSON:
             data = json.load(userJSON)
-            # print(len(data))
             for i in data:
-                # pw_hash = bcrypt.generate_password_hash(_pword)
                 print("data in file:"+i['password'])
                 if i['username'] == _name and bcrypt.check_password_hash(i['password'], _pword) and i['2fa'] == _2fa:
                     session['username'] = request.form['username']
-                    # result = "success"
                     print("true")
                     return render_template("layouts/login.html", result=Markup('<p id="result" hidden>success</p>'))
-                    # return "logged"
             return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>'))
     else:
-        # result = "failure"
         return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>'))
 
 
@@ -113,7 +104,6 @@ def spellCheckPost():
         print(username)
         print("inside spell post")
         text = request.form['text']
-        # print(text)
 
         f = open('tmp.txt', 'w+')
         f.write(text)
@@ -145,7 +135,6 @@ def spellCheckPost():
 @app.route("/logout", methods=['GET'])
 def logout():
     session.pop('username', None)
-    # return "logged out"
     return url_for('loginget')
 
 

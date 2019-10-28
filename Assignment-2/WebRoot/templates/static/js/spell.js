@@ -1,6 +1,3 @@
-
-
-    
 $(function () {
 
     var csrf_token = "{{ csrf_token() }}";
