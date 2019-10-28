@@ -1,14 +1,18 @@
-window.onload = function () {
-    //var resultsss = {{result}};
-    //alert("hi"+resultsss);
-    var result = document.getElementById("result").innerHTML;
 
-    //alert("2"+result);
-    if (result != "" && result != undefined) {
+$(function () {
+
+    var result = document.getElementById("success").innerHTML;
+    //alert(result);
+ 
+    if (result != "" && result != undefined && result!="none") {
         alert(result);
         result = "";
-        document.getElementById("result").value = " ";
+        //document.getElementById("result").innerHTML = " ";
     }
-    document.getElementById("result").hidden = true;
+    document.getElementById("success").hidden = true;
 
-};
+    $('#Register').on('click', function (event) {
+        window.location.href = '/register';
+    });
+});
+

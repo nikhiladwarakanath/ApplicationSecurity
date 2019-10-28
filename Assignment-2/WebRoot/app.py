@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, json, redirect, url_for, session
+from flask import Flask, render_template, request, json, redirect, url_for, session, Markup
+from flask_bcrypt import Bcrypt
 import os.path
 import sys
 import subprocess
@@ -11,6 +12,9 @@ app.secret_key = "temp"
 app._static_folder = os.path.abspath("templates/static/")
 
 
+
+bcrypt = Bcrypt(app)
+
 @app.route('/home', methods=['GET', 'POST'])
 def home():
     return render_template('layouts/home.html')
@@ -18,7 +22,7 @@ def home():
 
 @app.route("/register", methods=['GET'])
 def regget():
-    return render_template('/layouts/register.html', result="")
+    return render_template('/layouts/register.html', result="none")
 
 
 @app.route("/register", methods=['POST'])
@@ -28,17 +32,20 @@ def reg():
     _2fa = request.form['2fa']
     print(_pword)
     print(_name)
+    print(type(_name))
+    print(type(_pword))
     if _name and _pword:
         with open('userList.json', mode='a+', encoding='utf-8') as feedsjson:
             feedsjson.seek(0, os.SEEK_END)
             feedsjson.seek(feedsjson.tell() - 1, os.SEEK_SET)
             feedsjson.truncate()
+            pw_hash = bcrypt.generate_password_hash(_pword)
             feedsjson.write(',')
             if _2fa:
-                entry = {'username': _name, 'password': _pword, '2fa': _2fa}
+                entry = {'username': _name, 'password': pw_hash.decode('utf-8'), '2fa': _2fa}
                 json.dump(entry, feedsjson)
             else:
-                entry = {'username': _name, 'password': _pword, '2fa': ''}
+                entry = {'username': _name, 'password': pw_hash, '2fa': ''}
                 json.dump(entry, feedsjson)
             feedsjson.write(']')
         return render_template("/layouts/register.html", result="success")
@@ -48,43 +55,45 @@ def reg():
 
 @app.route("/login", methods=['GET'])
 def loginget():
-    return render_template("layouts/login.html", result="")
+    return render_template("layouts/login.html", result=Markup('<p id="res" hidden>none</p>'))
 
 
 @app.route("/login", methods=['POST'])
 def loginpost():
     _name = request.form['username']
     _pword = request.form['password']
+    print(_pword)
     _2fa = request.form['2fa']
-    result = ""
+    # //result = ""
     if _name and _pword:
         with open('userList.json') as json_file:
             data = json.load(json_file)
             # print(len(data))
             for i in data:
-                if i['username'] == _name and i['password'] == _pword and i['2fa'] == _2fa:
+                # pw_hash = bcrypt.generate_password_hash(_pword)
+                print("data in file:"+i['password'])
+                if i['username'] == _name and bcrypt.check_password_hash(i['password'], _pword) and i['2fa'] == _2fa:
                     session['username'] = request.form['username']
-                    result = "success"
-                    return redirect(url_for('spellCheck'))
+                    # result = "success"
+                    print("true")
+                    return render_template("layouts/login.html", result=Markup('<p id="result" hidden>success</p>'))   
                     # return "logged"
-                else:
-                    result = "failure"
-                    return render_template("layouts/login.html", result=result)
+            return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>'))   
     else:
-        result = "failure"
-        return render_template("layouts/login.html", result=result)
+        # result = "failure"
+        return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>'))
 
 
-@app.route("/spellcheck", methods=['GET'])
+@app.route("/spell_check", methods=['GET'])
 def spellCheck():
     if 'username' in session:
         username = session['username']
         if username:
-            return render_template('layouts/spellCheck.html')
+            return render_template('layouts/spellCheck.html', misspelled="")
     return redirect(url_for('loginget'))
 
 
-@app.route("/spellcheck", methods=['POST'])
+@app.route("/spell_check", methods=['POST'])
 def spellCheckPost():
     if 'username' in session:
         username = session['username']
@@ -106,16 +115,17 @@ def spellCheckPost():
                 '/home/nikhila/My Stuff/AppSec/ApplicationSecurity/Assignment-2/WebRoot/')
             cmd = ['./spell_check', 'tmp.txt', 'wordlist.txt']
             p = subprocess.check_output(cmd, stderr=subprocess.PIPE)
-            misspelled = p
+            misspelled = p.decode('ASCII')
             print(misspelled)
-            outFile.write(misspelled)
+            outFile.write(p)
             outFile.close()
+            return render_template('/layouts/spellCheck.html', misspelled=misspelled)
         except OSError as e:
             print("error %s" % e.strerror)
 
         fr.close()
         session.pop('username', None)
-        return misspelled
+        
 
     return "You are not logged in <br><a href = '/login'></b>" + "click here to log in</b></a>"
 
