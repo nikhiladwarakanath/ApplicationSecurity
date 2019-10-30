@@ -1,0 +1,14 @@
+bin/
+lib/
+include/
+__pycache__/
+.tox/
+.pytest_cache/
+.idea/
+
+#Packages
+*.zip
+*.o
+*.json
+
+*info/
