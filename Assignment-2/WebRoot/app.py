@@ -3,6 +3,7 @@ from flask_bcrypt import Bcrypt
 import os.path
 import sys
 import subprocess
+import pytest
 from werkzeug.utils import secure_filename
 from flask_wtf.csrf import CSRFProtect, CSRFError
 
@@ -115,7 +116,7 @@ def create_app():
 
             try:
                 os.chdir(
-                    '/home/nikhila/My Stuff/AppSec/ApplicationSecurity/Assignment-2/WebRoot/')
+                    '/home/nikhila/My Stuff/NYU/Fall 2019/Application Security/Assignment-2/ApplicationSecurity/Assignment-2/WebRoot/')
                 cmd = ['./spell_check', 'tmp.txt', 'wordlist.txt']
                 p = subprocess.check_output(cmd, stderr=subprocess.PIPE)
                 misspelled = p.decode('ASCII')
