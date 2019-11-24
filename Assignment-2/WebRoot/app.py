@@ -126,7 +126,7 @@ def create_app():
                     print("true")
                     return render_template("layouts/login.html", result=Markup('<p id="result" hidden>success</p>'))
                 return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>'))
-
+            return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>'))
 
             # with open('userList.json') as userJSON:
             #     data = json.load(userJSON)
@@ -140,14 +140,46 @@ def create_app():
         else:
             return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>'))
 
-#    @app.route("/history", methods=['GET'])
-#     def getHistory():
-#         if 'username' in session:
-#             username = session['username']
-#             if username:
-#                 return render_template('layouts/spellCheck.html', misspelled="")
-#         return redirect(url_for('loginget'))
+    
+    
+    @app.route("/history", methods=['GET'])
+    def getHistory():
+        if 'username' in session:
+            username = session['username']
+            if username:
+                if username =='admin':
+                    print("ADMIN")
+                else:
+                    cur = get_db().cursor()
+                    cur.execute("select count(1) from user_query where user_name=?", (username,))
+                    res = cur.fetchone()
+                    counts = res[0]
+                    print(res[0])
 
+                    cur.execute("select queryid from user_query where user_name=?", (username,))
+                    queries = cur.fetchall()
+                return render_template('layouts/history.html', numqueries=counts, query=queries)
+            return redirect(url_for('loginget'))
+        return redirect(url_for('loginget'))
+
+    @app.route("/history/review/<query>", methods=['GET'])
+    def getReview(query):
+        print(query)
+        queryid = query.strip("query")
+        print(queryid)
+        if 'username' in session:
+            username = session['username']
+            if username:
+                cur = get_db().cursor()
+                cur.execute("select count(1) from user_query where user_name=?", (username,))
+                res = cur.fetchone()
+                counts = res[0]
+                print(res[0])
+                cur.execute("select queryid, user_name, input_text, result from user_query where user_name=? and queryid=?", (username,queryid,))
+                queries = cur.fetchall()
+                return render_template('layouts/review.html', numqueries=counts, query=queries)
+            return redirect(url_for('loginget'))
+        return redirect(url_for('loginget'))
 
 
 
