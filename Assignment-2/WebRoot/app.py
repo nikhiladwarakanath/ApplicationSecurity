@@ -4,8 +4,19 @@ import os.path
 import sys
 import subprocess
 import pytest
+from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask_wtf.csrf import CSRFProtect, CSRFError
+import sqlite3
+from flask import g
+
+DATABASE = 'database.db'
+
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DATABASE)
+    return db
 
 
 def create_app():
@@ -17,6 +28,15 @@ def create_app():
     csrf = CSRFProtect(app)
     bcrypt = Bcrypt(app)
     
+
+    @app.teardown_appcontext
+    def close_connection(exception):
+        db = getattr(g, '_database', None)
+        if db is not None:
+            db.close()
+
+
+
     
     @app.errorhandler(CSRFError)
     def handle_csrf_error(e):
@@ -42,23 +62,35 @@ def create_app():
         _name = request.form['username']
         _pword = request.form['password']
         _2fa = request.form['2fa']
+
+        
         
         if _name and _pword:
-            with open('userList.json', mode='a+', encoding='utf-8') as userJSON:
-                userJSON.seek(0, os.SEEK_END)
-                userJSON.seek(userJSON.tell() - 1, os.SEEK_SET)
-                userJSON.truncate()
-                pw_hash = bcrypt.generate_password_hash(_pword)
-                userJSON.write(',')
-                if _2fa:
-                    entry = {'username': _name,
-                            'password': pw_hash.decode('utf-8'), '2fa': _2fa}
-                    json.dump(entry, userJSON)
-                else:
-                    entry = {'username': _name, 'password': pw_hash, '2fa': ''}
-                    json.dump(entry, userJSON)
-                userJSON.write(']')
+
+            pw_hash = bcrypt.generate_password_hash(_pword)
+            stored_pw = pw_hash.decode('utf-8')
+            cur = get_db().cursor()
+            cur.execute("INSERT INTO user_info(username, password, twofactor) VALUES (?,?,?)", (_name, stored_pw,_2fa))
+            
+            get_db().commit()
+
+
             return render_template("/layouts/register.html", result=Markup("success"))
+            # with open('userList.json', mode='a+', encoding='utf-8') as userJSON:
+            #     userJSON.seek(0, os.SEEK_END)
+            #     userJSON.seek(userJSON.tell() - 1, os.SEEK_SET)
+            #     userJSON.truncate()
+            #     pw_hash = bcrypt.generate_password_hash(_pword)
+            #     userJSON.write(',')
+            #     if _2fa:
+            #         entry = {'username': _name,
+            #                 'password': pw_hash.decode('utf-8'), '2fa': _2fa}
+            #         json.dump(entry, userJSON)
+            #     else:
+            #         entry = {'username': _name, 'password': pw_hash, '2fa': ''}
+            #         json.dump(entry, userJSON)
+            #     userJSON.write(']')
+            
         else:
             return render_template("/layouts/register.html", result=Markup("failure"))
 
@@ -76,17 +108,47 @@ def create_app():
         _2fa = request.form['2fa']
         
         if _name and _pword:
-            with open('userList.json') as userJSON:
-                data = json.load(userJSON)
-                for i in data:
-                    print("data in file:"+i['password'])
-                    if i['username'] == _name and bcrypt.check_password_hash(i['password'], _pword) and i['2fa'] == _2fa:
-                        session['username'] = request.form['username']
-                        print("true")
-                        return render_template("layouts/login.html", result=Markup('<p id="result" hidden>success</p>'))
+            cur = get_db().cursor()
+            cur.execute("INSERT INTO user_access_log(username, login_time) VALUES (?,?)", (_name,datetime.now()))
+            get_db().commit()
+            cur = get_db().cursor()
+            cur.execute("select username, password, twofactor from user_info where username =?", (_name,))
+            res = cur.fetchone()
+
+            print(res)
+
+            if res:
+                uname = res[0]
+                password = res[1]
+                twofactor = res[2]
+                if uname == _name and bcrypt.check_password_hash(password, _pword) and twofactor == _2fa:
+                    session['username'] = request.form['username']
+                    print("true")
+                    return render_template("layouts/login.html", result=Markup('<p id="result" hidden>success</p>'))
                 return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>'))
+
+
+            # with open('userList.json') as userJSON:
+            #     data = json.load(userJSON)
+            #     for i in data:
+            #         print("data in file:"+i['password'])
+            #         if i['username'] == _name and bcrypt.check_password_hash(i['password'], _pword) and i['2fa'] == _2fa:
+            #             session['username'] = request.form['username']
+            #             print("true")
+            #             return render_template("layouts/login.html", result=Markup('<p id="result" hidden>success</p>'))
+            #     return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>'))
         else:
             return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>'))
+
+#    @app.route("/history", methods=['GET'])
+#     def getHistory():
+#         if 'username' in session:
+#             username = session['username']
+#             if username:
+#                 return render_template('layouts/spellCheck.html', misspelled="")
+#         return redirect(url_for('loginget'))
+
+
 
 
     @app.route("/spell_check", methods=['GET'])
@@ -106,6 +168,7 @@ def create_app():
             print("inside spell post")
             text = request.form['text']
 
+
             f = open('tmp.txt', 'w+')
             f.write(text)
             f.close()
@@ -120,6 +183,11 @@ def create_app():
                 cmd = ['./spell_check', 'tmp.txt', 'wordlist.txt']
                 p = subprocess.check_output(cmd, stderr=subprocess.PIPE)
                 misspelled = p.decode('ASCII')
+
+                cur = get_db().cursor()
+                cur.execute("INSERT INTO user_query(user_name, input_text, result) VALUES (?,?,?)", (username, text,misspelled))
+                get_db().commit()
+
                 print(misspelled)
                 outFile.write(p)
                 outFile.close()
@@ -135,6 +203,13 @@ def create_app():
 
     @app.route("/logout", methods=['GET'])
     def logout():
+        cur = get_db().cursor()
+        username = session['username']
+        cur.execute("select max(access_id) from user_access_log where logout_time is null and username=?", (username,))
+        res = cur.fetchone()
+        print(res[0])
+        cur.execute("update user_access_log set logout_time=? where access_id = ?", (datetime.now(), res[0]))
+        get_db().commit()
         session.pop('username', None)
         return url_for('loginget')
     
