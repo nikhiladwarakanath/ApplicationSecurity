@@ -149,6 +149,13 @@ def create_app():
             if username:
                 if username =='admin':
                     print("ADMIN")
+                    cur = get_db().cursor()
+                    cur.execute("select count(1) from user_query" )
+                    res = cur.fetchone()
+                    counts = res[0]
+                    print(res[0])
+                    cur.execute("select queryid from user_query")
+                    queries = cur.fetchall()
                 else:
                     cur = get_db().cursor()
                     cur.execute("select count(1) from user_query where user_name=?", (username,))
@@ -180,6 +187,34 @@ def create_app():
                 return render_template('layouts/review.html', numqueries=counts, query=queries)
             return redirect(url_for('loginget'))
         return redirect(url_for('loginget'))
+
+    @app.route("/login_history", methods=['GET'])
+    def getLoginHistory():
+        
+        if 'username' in session:
+            username = session['username']
+            if username:
+                if username =='admin':                   
+                    return render_template('layouts/login_history.html', result='')
+            return redirect(url_for('loginget'))
+        return redirect(url_for('loginget'))
+
+    @app.route("/login_history", methods=['POST'])
+    def postLoginHistory():
+        print(request.form)
+        _name = request.form['userid']
+        if 'username' in session:
+            username = session['username']
+            if username:
+                if username =='admin':  
+                    if _name:
+                        cur = get_db().cursor()
+                        cur.execute("select access_id, login_time,logout_time from user_access_log where username= ?",(_name,))
+                        res = cur.fetchall()
+
+                        return render_template('layouts/login_history.html', result=res)
+            return render_template('layouts/login_history.html', result='')
+        return render_template('layouts/login_history.html', result='')
 
 
 
