@@ -166,7 +166,7 @@ def create_app():
                     cur.execute("select queryid from user_query where user_name=?", (username,))
                     queries = cur.fetchall()
                 return render_template('layouts/history.html', numqueries=counts, query=queries)
-            return redirect(url_for('loginget'))
+            return render_template('layouts/history.html', numqueries=0, query='')
         return redirect(url_for('loginget'))
 
     @app.route("/history/review/<query>", methods=['GET'])
@@ -185,7 +185,7 @@ def create_app():
                 cur.execute("select queryid, user_name, input_text, result from user_query where user_name=? and queryid=?", (username,queryid,))
                 queries = cur.fetchall()
                 return render_template('layouts/review.html', numqueries=counts, query=queries)
-            return redirect(url_for('loginget'))
+            return render_template('layouts/review.html', numqueries=0, query='')
         return redirect(url_for('loginget'))
 
     @app.route("/login_history", methods=['GET'])
@@ -196,8 +196,8 @@ def create_app():
             if username:
                 if username =='admin':                   
                     return render_template('layouts/login_history.html', result='')
-            return redirect(url_for('loginget'))
-        return redirect(url_for('loginget'))
+            return render_template('layouts/login_history.html', result='')
+        return render_template('layouts/login_history.html', result='')
 
     @app.route("/login_history", methods=['POST'])
     def postLoginHistory():
