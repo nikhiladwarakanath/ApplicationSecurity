@@ -67,12 +67,22 @@ def create_app():
         
         if _name and _pword:
 
-            pw_hash = bcrypt.generate_password_hash(_pword)
-            stored_pw = pw_hash.decode('utf-8')
-            cur = get_db().cursor()
-            cur.execute("INSERT INTO user_info(username, password, twofactor) VALUES (?,?,?)", (_name, stored_pw,_2fa))
-            
-            get_db().commit()
+            if _name == 'admin':
+                if _pword=='Administrator@1' and _2fa=='12345678901':
+                    pw_hash = bcrypt.generate_password_hash(_pword)
+                    stored_pw = pw_hash.decode('utf-8')
+                    cur = get_db().cursor()
+                    cur.execute("INSERT INTO user_info(username, password, twofactor) VALUES (?,?,?)", (_name, stored_pw,_2fa))
+                    get_db().commit()
+                    return render_template("/layouts/register.html", result=Markup("success"))
+                else:
+                    return render_template("/layouts/register.html", result=Markup("failure"))
+            else:
+                pw_hash = bcrypt.generate_password_hash(_pword)
+                stored_pw = pw_hash.decode('utf-8')
+                cur = get_db().cursor()
+                cur.execute("INSERT INTO user_info(username, password, twofactor) VALUES (?,?,?)", (_name, stored_pw,_2fa))
+                get_db().commit()
 
 
             return render_template("/layouts/register.html", result=Markup("success"))
@@ -108,6 +118,8 @@ def create_app():
         _2fa = request.form['2fa']
         
         if _name and _pword:
+
+            
             cur = get_db().cursor()
             cur.execute("INSERT INTO user_access_log(username, login_time) VALUES (?,?)", (_name,datetime.now()))
             get_db().commit()
@@ -117,14 +129,26 @@ def create_app():
 
             print(res)
 
+
+
+
             if res:
                 uname = res[0]
                 password = res[1]
                 twofactor = res[2]
-                if uname == _name and bcrypt.check_password_hash(password, _pword) and twofactor == _2fa:
-                    session['username'] = request.form['username']
-                    print("true")
-                    return render_template("layouts/login.html", result=Markup('<p id="result" hidden>success</p>'))
+                if uname == 'admin' :
+                    if bcrypt.check_password_hash(password, _pword) and _pword=='Administrator@1' and twofactor == _2fa and _2fa=='12345678901':
+                        session['username'] = request.form['username']
+                        print("true")
+                        return render_template("layouts/login.html", result=Markup('<p id="result" hidden>success</p>')) 
+                    else:
+                        return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>')) 
+                else:
+                    
+                    if uname == _name and bcrypt.check_password_hash(password, _pword) and twofactor == _2fa:
+                        session['username'] = request.form['username']
+                        print("true")
+                        return render_template("layouts/login.html", result=Markup('<p id="result" hidden>success</p>'))
                 return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>'))
             return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>'))
 
@@ -148,45 +172,66 @@ def create_app():
             username = session['username']
             if username:
                 if username =='admin':
-                    print("ADMIN")
-                    cur = get_db().cursor()
-                    cur.execute("select count(1) from user_query" )
-                    res = cur.fetchone()
-                    counts = res[0]
-                    print(res[0])
-                    cur.execute("select queryid from user_query")
-                    queries = cur.fetchall()
+                   return render_template('layouts/history.html', numqueries=0, query='', adminflag = 1)
                 else:
                     cur = get_db().cursor()
                     cur.execute("select count(1) from user_query where user_name=?", (username,))
                     res = cur.fetchone()
                     counts = res[0]
-                    print(res[0])
-
+                    # print(res[0])
                     cur.execute("select queryid from user_query where user_name=?", (username,))
                     queries = cur.fetchall()
-                return render_template('layouts/history.html', numqueries=counts, query=queries)
-            return render_template('layouts/history.html', numqueries=0, query='')
-        return redirect(url_for('loginget'))
+                return render_template('layouts/history.html', numqueries=counts, query=queries, adminflag = 0)
+            return render_template('layouts/history.html', numqueries=-1, query='', adminflag = 0)
+        return  render_template('layouts/history.html', numqueries=-1, query='',adminflag = 0)
 
-    @app.route("/history/review/<query>", methods=['GET'])
-    def getReview(query):
-        print(query)
-        queryid = query.strip("query")
-        print(queryid)
+    @app.route("/history", methods=['POST'])
+    def postHistory():
+        _name = request.form['userquery']
         if 'username' in session:
             username = session['username']
             if username:
-                cur = get_db().cursor()
-                cur.execute("select count(1) from user_query where user_name=?", (username,))
-                res = cur.fetchone()
-                counts = res[0]
-                print(res[0])
-                cur.execute("select queryid, user_name, input_text, result from user_query where user_name=? and queryid=?", (username,queryid,))
-                queries = cur.fetchall()
-                return render_template('layouts/review.html', numqueries=counts, query=queries)
-            return render_template('layouts/review.html', numqueries=0, query='')
-        return redirect(url_for('loginget'))
+                if username =='admin':
+                    # print("ADMIN")
+                    cur = get_db().cursor()
+                    cur.execute("select count(1) from user_query where user_name=?",(_name,) )
+                    res = cur.fetchone()
+                    counts = res[0]
+                    # print(res[0])
+                    cur.execute("select queryid from user_query where user_name=?", (_name,))
+                    queries = cur.fetchall()
+                    return render_template('layouts/history.html', numqueries=counts, query=queries, adminflag = 1)
+                else:
+                    return render_template('layouts/history.html', numqueries=0, query=0, adminflag = 0)
+            return render_template('layouts/history.html', numqueries=-1, query='', adminflag = 0)
+        return  render_template('layouts/history.html', numqueries=-1, query='',adminflag=0)
+
+    @app.route("/history/<query>", methods=['GET'])
+    def getReview(query):
+        # print(query)
+        queryid = query.strip("query")
+        # print(queryid)
+        if 'username' in session:
+            username = session['username']
+            if username:
+                if username == 'admin':
+                    # print("inside admin")
+                    cur = get_db().cursor()
+                    # /print(res[0])
+                    cur.execute("select queryid, user_name, input_text, result from user_query where queryid=?", (queryid,))
+                    queries = cur.fetchall()
+                    return render_template('layouts/review.html', numqueries=0, query=queries, username=username)
+                else:
+                    cur = get_db().cursor()
+                    cur.execute("select count(1) from user_query where user_name=?", (username,))
+                    res = cur.fetchone()
+                    counts = res[0]
+                    # print(res[0])
+                    cur.execute("select queryid, user_name, input_text, result from user_query where user_name=? and queryid=?", (username,queryid,))
+                    queries = cur.fetchall()
+                    return render_template('layouts/review.html', numqueries=counts, query=queries, username=username)
+            return render_template('layouts/review.html', numqueries=0, query='', username=username)
+        return render_template('layouts/history.html', numqueries=0, query='',username=username)
 
     @app.route("/login_history", methods=['GET'])
     def getLoginHistory():
@@ -194,10 +239,15 @@ def create_app():
         if 'username' in session:
             username = session['username']
             if username:
+                print(username)
                 if username =='admin':                   
                     return render_template('layouts/login_history.html', result='')
-            return render_template('layouts/login_history.html', result='')
-        return render_template('layouts/login_history.html', result='')
+                else:
+                    return redirect(url_for('spellCheck'), 404)    
+            else:
+                return redirect(url_for('spellCheck'), 404)
+        else:
+            return redirect(url_for('spellCheck'), 404)
 
     @app.route("/login_history", methods=['POST'])
     def postLoginHistory():
@@ -206,6 +256,7 @@ def create_app():
         if 'username' in session:
             username = session['username']
             if username:
+                print(username)
                 if username =='admin':  
                     if _name:
                         cur = get_db().cursor()
@@ -213,8 +264,8 @@ def create_app():
                         res = cur.fetchall()
 
                         return render_template('layouts/login_history.html', result=res)
-            return render_template('layouts/login_history.html', result='')
-        return render_template('layouts/login_history.html', result='')
+            return redirect(url_for('spellCheck'), 404)
+        return redirect(url_for('spellCheck'), 404)
 
 
 

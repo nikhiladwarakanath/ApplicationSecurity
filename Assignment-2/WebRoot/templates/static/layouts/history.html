@@ -6,23 +6,51 @@
 
 <body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-    <p> Number of queries are:</p>
-    <div id="numqueries">
+    <div>
+        <div>
+            {% block content %}
+            {%if adminflag ==1 %}
 
-        {{numqueries}}
+
+            <div>
+                Enter the User ID
+                <form id="myForm" enctype="multipart/form-data" method="POST">
+                    <input type='text' id="userquery" name='userquery' />
+                    <input type="submit" value="Submit" />
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                </form>
+            </div>
+        </div>
+
+        <p> Number of queries are:</p>
+        <button id="numqueries" value={{numqueries}}>{{numqueries}}</button>
         <div id="queries">
-            <table>
-                {% for item in query %}
 
-                <tr>
-                    <td>
-                        <a id="Query{{item[0]}}" href="history/review/query{{item[0]}}">Query{{item[0]}}</a>
-                    </td>
-                </tr>
-                {%endfor %}
-            </table>
+            {% for item in query %}
+            <a id="query{{item[0]}}" href="/history/query{{item[0]}}">query{{item[0]}}</a><br />
+            {%endfor %}
 
         </div>
     </div>
+
+
+
+
+    {% else %}
+    <p> Number of queries are:</p>
+    <button id="numqueries" value={{numqueries}}>{{numqueries}}</button>
+    <div id="queries2">
+        
+            {% for item in query %}
+            <a id="query{{item[0]}}" href="/history/query{{item[0]}}">query{{item[0]}}</a><br/>
+            {%endfor %}
+
+
+    </div>
+    </div>
+
+    {% endif %}
+    {% endblock content %}
     <br />
+    </div>
 </body>
