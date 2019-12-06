@@ -8,5 +8,25 @@
         "2fa": "hi",
         "password": "$2b$12$LxqDpYn/YnsjwEFhVBBno.BbBfhwTV.HNvQefH9okI.I2NG5.Bn/S",
         "username": "hi"
+    },
+    {
+        "2fa": "bridge",
+        "password": "$2b$12$D4D7EC2sxC9YCmd5mQiWxOXLKylWK4ukPMpsokCT3lbh9ahqSWgVO",
+        "username": "bridge"
+    },
+    {
+        "2fa": "17572028962",
+        "password": "$2b$12$g8tD1nLRqRVd3aIWU0JAKOKa0Y1BFJSMYc4mfw6F/cdRr4u.iOxWi",
+        "username": "spellchecktest"
+    },
+    {
+        "2fa": "kin",
+        "password": "$2b$12$vzKgp4KwaasKms9cXroTe.04m8F.I1VitgCu/Ro6POGnDTQQbEPAW",
+        "username": "kin"
+    },
+    {
+        "2fa": "link",
+        "password": "$2b$12$wlo5Zs.oXbUJpKbN1Vw/pOXJRJxJlZNXxeSB5oREzJkWnAawwdWUq",
+        "username": "link"
     }
-,{"2fa": "bridge", "password": "$2b$12$D4D7EC2sxC9YCmd5mQiWxOXLKylWK4ukPMpsokCT3lbh9ahqSWgVO", "username": "bridge"},{"2fa": "17572028962", "password": "$2b$12$g8tD1nLRqRVd3aIWU0JAKOKa0Y1BFJSMYc4mfw6F/cdRr4u.iOxWi", "username": "spellchecktest"},{"2fa": "kin", "password": "$2b$12$vzKgp4KwaasKms9cXroTe.04m8F.I1VitgCu/Ro6POGnDTQQbEPAW", "username": "kin"},{"2fa": "link", "password": "$2b$12$wlo5Zs.oXbUJpKbN1Vw/pOXJRJxJlZNXxeSB5oREzJkWnAawwdWUq", "username": "link"}]
+,{"2fa": "123", "password": "$2b$12$APWRO4gBKXMFWoZsbnUaDezdVLItMkrqIKKxOK3tnD/o8xwHuvQq.", "username": "%22%3E%3Cscript%3Ealert(document.cookie)%3C%2Fscript%3E"},{"2fa": "cable", "password": "$2b$12$k4VR6SoRHKGXsXo.hB0GNuGyxL1/gnLgex0725vr50Aiw0cbDwQM2", "username": "cable"},{"2fa": "yum", "password": "$2b$12$/q6QriNy4L2m65azBor42eCK20FadCYzePpWNdTfZjRLiy2iI4u4y", "username": "yum"},{"2fa": "lop", "password": "$2b$12$qf3N2oO2a2PglRFcNMqrfuaQGo4M0aMoDRG5H2ivzV4rCE7opKhYy", "username": "lop"},{"2fa": "lop", "password": "$2b$12$LPI9wa83i5ejnrYvi7rkaezbLlU/lhz1dWpN3LAVaUOTmjo3rT35G", "username": "lop"},{"2fa": "enter", "password": "$2b$12$AqtPrwC4QCUIC9CJ1rzgN.zV8fa6qHdgJXlKxYoXTl5fAOD9ntpV.", "username": "enter"},{"2fa": "enter", "password": "$2b$12$dXhq7sM8yIpgHu0yY8s5n.zpG4edKT0pG5v01XYU4pZg4qLjpoAkS", "username": "enter"},{"2fa": "him", "password": "$2b$12$3bI2bjfGrHb72OM7qAKKLeX71tWSKqtX.XzAW9g2JCkI9bciz0se.", "username": "him"},{"2fa": "mill", "password": "$2b$12$RyxadHdDUVUL6029BDo2zu6oXbG16QXcHmf5z0m2RgNqFrRPZTNNW", "username": "mill"},{"2fa": "kin", "password": "$2b$12$qar6k7Bz0biXrW4TOp5ci.ly44xzE8pg1jY2Jebm9fzLnOFn2b8q6", "username": "kin"}]

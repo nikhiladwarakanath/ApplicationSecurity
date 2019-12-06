@@ -9,6 +9,12 @@ from werkzeug.utils import secure_filename
 from flask_wtf.csrf import CSRFProtect, CSRFError
 import sqlite3
 from flask import g
+from flask_login import current_user, logout_user, LoginManager, login_user, UserMixin
+from flask_session import Session
+
+
+
+sess = Session()
 
 DATABASE = 'database.db'
 
@@ -24,6 +30,7 @@ def create_app():
     app.url_map.strict_slashes = False
     app.secret_key = "temp"
     app._static_folder = os.path.abspath("templates/static/")
+    
 
     csrf = CSRFProtect(app)
     bcrypt = Bcrypt(app)
@@ -146,8 +153,9 @@ def create_app():
                 else:
                     
                     if uname == _name and bcrypt.check_password_hash(password, _pword) and twofactor == _2fa:
-                        session['username'] = request.form['username']
+                        user = request.form['username']
                         print("true")
+                        session['username'] = request.form['username']
                         return render_template("layouts/login.html", result=Markup('<p id="result" hidden>success</p>'))
                 return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>'))
             return render_template("layouts/login.html", result=Markup('<p id="result" hidden>failure</p>'))
@@ -168,84 +176,78 @@ def create_app():
     
     @app.route("/history", methods=['GET'])
     def getHistory():
-        if 'username' in session:
-            username = session['username']
-            if username:
-                if username =='admin':
-                   return render_template('layouts/history.html', numqueries=0, query='', adminflag = 1)
-                else:
-                    cur = get_db().cursor()
-                    cur.execute("select count(1) from user_query where user_name=?", (username,))
-                    res = cur.fetchone()
-                    counts = res[0]
-                    # print(res[0])
-                    cur.execute("select queryid from user_query where user_name=?", (username,))
-                    queries = cur.fetchall()
+        username = session.get('username')
+        print(username)
+        if username:
+            if username =='admin':
+                return render_template('layouts/history.html', numqueries=0, query='', adminflag = 1)
+            else:
+                cur = get_db().cursor()
+                cur.execute("select count(1) from user_query where user_name=?", (username,))
+                res = cur.fetchone()
+                counts = res[0]
+                # print(res[0])
+                cur.execute("select queryid from user_query where user_name=?", (username,))
+                queries = cur.fetchall()
                 return render_template('layouts/history.html', numqueries=counts, query=queries, adminflag = 0)
-            return render_template('layouts/history.html', numqueries=-1, query='', adminflag = 0)
-        return  render_template('layouts/history.html', numqueries=-1, query='',adminflag = 0)
+        return render_template('layouts/history.html', numqueries=-1, query='', adminflag = 0)
+        
 
     @app.route("/history", methods=['POST'])
     def postHistory():
         _name = request.form['userquery']
-        if 'username' in session:
-            username = session['username']
-            if username:
-                if username =='admin':
-                    # print("ADMIN")
-                    cur = get_db().cursor()
-                    cur.execute("select count(1) from user_query where user_name=?",(_name,) )
-                    res = cur.fetchone()
-                    counts = res[0]
-                    # print(res[0])
-                    cur.execute("select queryid from user_query where user_name=?", (_name,))
-                    queries = cur.fetchall()
-                    return render_template('layouts/history.html', numqueries=counts, query=queries, adminflag = 1)
-                else:
-                    return render_template('layouts/history.html', numqueries=0, query=0, adminflag = 0)
-            return render_template('layouts/history.html', numqueries=-1, query='', adminflag = 0)
-        return  render_template('layouts/history.html', numqueries=-1, query='',adminflag=0)
+        username = session.get('username')
+        if username:
+            if username =='admin':
+                # print("ADMIN")
+                cur = get_db().cursor()
+                cur.execute("select count(1) from user_query where user_name=?",(_name,) )
+                res = cur.fetchone()
+                counts = res[0]
+                # print(res[0])
+                cur.execute("select queryid from user_query where user_name=?", (_name,))
+                queries = cur.fetchall()
+                return render_template('layouts/history.html', numqueries=counts, query=queries, adminflag = 1)
+            else:
+                return render_template('layouts/history.html', numqueries=0, query=0, adminflag = 0)
+        return render_template('layouts/history.html', numqueries=-1, query='', adminflag = 0)
+        
 
     @app.route("/history/<query>", methods=['GET'])
     def getReview(query):
         # print(query)
         queryid = query.strip("query")
         # print(queryid)
-        if 'username' in session:
-            username = session['username']
-            if username:
-                if username == 'admin':
-                    # print("inside admin")
-                    cur = get_db().cursor()
-                    # /print(res[0])
-                    cur.execute("select queryid, user_name, input_text, result from user_query where queryid=?", (queryid,))
-                    queries = cur.fetchall()
-                    return render_template('layouts/review.html', numqueries=0, query=queries, username=username)
-                else:
-                    cur = get_db().cursor()
-                    cur.execute("select count(1) from user_query where user_name=?", (username,))
-                    res = cur.fetchone()
-                    counts = res[0]
-                    # print(res[0])
-                    cur.execute("select queryid, user_name, input_text, result from user_query where user_name=? and queryid=?", (username,queryid,))
-                    queries = cur.fetchall()
-                    return render_template('layouts/review.html', numqueries=counts, query=queries, username=username)
-            return render_template('layouts/review.html', numqueries=0, query='', username=username)
-        return render_template('layouts/history.html', numqueries=0, query='',username=username)
+        username = session.get('username')
+        if username:
+            if username == 'admin':
+                # print("inside admin")
+                cur = get_db().cursor()
+                # /print(res[0])
+                cur.execute("select queryid, user_name, input_text, result from user_query where queryid=?", (queryid,))
+                queries = cur.fetchall()
+                return render_template('layouts/review.html', numqueries=0, query=queries, username=username)
+            else:
+                cur = get_db().cursor()
+                cur.execute("select count(1) from user_query where user_name=?", (username,))
+                res = cur.fetchone()
+                counts = res[0]
+                # print(res[0])
+                cur.execute("select queryid, user_name, input_text, result from user_query where user_name=? and queryid=?", (username,queryid,))
+                queries = cur.fetchall()
+                return render_template('layouts/review.html', numqueries=counts, query=queries, username=username)
+        return render_template('layouts/review.html', numqueries=0, query='', username=username)
+        
 
     @app.route("/login_history", methods=['GET'])
     def getLoginHistory():
-        
-        if 'username' in session:
-            username = session['username']
-            if username:
-                print(username)
-                if username =='admin':                   
-                    return render_template('layouts/login_history.html', result='')
-                else:
-                    return redirect(url_for('spellCheck'), 404)    
+        username = session.get('username')
+        if username:
+            print(username)
+            if username =='admin':                   
+                return render_template('layouts/login_history.html', result='')
             else:
-                return redirect(url_for('spellCheck'), 404)
+                return redirect(url_for('spellCheck'), 404)    
         else:
             return redirect(url_for('spellCheck'), 404)
 
@@ -253,40 +255,40 @@ def create_app():
     def postLoginHistory():
         print(request.form)
         _name = request.form['userid']
-        if 'username' in session:
-            username = session['username']
-            if username:
-                print(username)
-                if username =='admin':  
-                    if _name:
-                        cur = get_db().cursor()
-                        cur.execute("select access_id, login_time,logout_time from user_access_log where username= ?",(_name,))
-                        res = cur.fetchall()
-
-                        return render_template('layouts/login_history.html', result=res)
+        username = session.get('username')
+        if username:
+            print(username)
+            if username =='admin':  
+                if _name:
+                    cur = get_db().cursor()
+                    cur.execute("select access_id, login_time,logout_time from user_access_log where username= ?",(_name,))
+                    res = cur.fetchall()
+                    return render_template('layouts/login_history.html', result=res)
+                else:
+                    return redirect(url_for('spellCheck'), 404)
+            else:
+                return redirect(url_for('spellCheck'), 404)
+        else:
             return redirect(url_for('spellCheck'), 404)
-        return redirect(url_for('spellCheck'), 404)
-
 
 
     @app.route("/spell_check", methods=['GET'])
     def spellCheck():
-        if 'username' in session:
-            username = session['username']
-            if username:
-                return render_template('layouts/spellCheck.html', misspelled="")
-        return redirect(url_for('loginget'))
+        username = session.get('username')
+        print(username)
+        if username:
+            return render_template('layouts/spellCheck.html', misspelled="")
+        else:
+            return redirect(url_for('loginget'))
 
 
     @app.route("/spell_check", methods=['POST'])
     def spellCheckPost():
-        if 'username' in session:
-            username = session['username']
+        username = session.get('username')
+        if username:
             print(username)
             print("inside spell post")
             text = request.form['text']
-
-
             f = open('tmp.txt', 'w+')
             f.write(text)
             f.close()
@@ -296,12 +298,10 @@ def create_app():
             outFile = open('Output.txt', 'ab+')
 
             try:
-                os.chdir(
-                    '/home/nikhila/My Stuff/NYU/Fall 2019/Application Security/Assignment-2/ApplicationSecurity/Assignment-2/WebRoot/')
+                
                 cmd = ['./spell_check', 'tmp.txt', 'wordlist.txt']
                 p = subprocess.check_output(cmd, stderr=subprocess.PIPE)
                 misspelled = p.decode('ASCII')
-
                 cur = get_db().cursor()
                 cur.execute("INSERT INTO user_query(user_name, input_text, result) VALUES (?,?,?)", (username, text,misspelled))
                 get_db().commit()
@@ -312,23 +312,22 @@ def create_app():
                 return render_template('/layouts/spellCheck.html', misspelled=misspelled)
             except OSError as e:
                 print("error %s" % e.strerror)
-
             fr.close()
-            session.pop('username', None)
-
-        return "You are not logged in <br><a href = '/login'></b>" + "click here to log in</b></a>"
+        
+        return redirect(url_for('loginget'))
 
 
     @app.route("/logout", methods=['GET'])
     def logout():
         cur = get_db().cursor()
-        username = session['username']
+        username =  session.get('username')
         cur.execute("select max(access_id) from user_access_log where logout_time is null and username=?", (username,))
         res = cur.fetchone()
-        print(res[0])
+        # print(res[0])
         cur.execute("update user_access_log set logout_time=? where access_id = ?", (datetime.now(), res[0]))
         get_db().commit()
         session.pop('username', None)
+
         return url_for('loginget')
     
     return app
