@@ -1,17 +1,26 @@
 import pytest
-
-import app as temp
+import sqlite3
+from app import create_app, get_db as db
 
 @pytest.fixture('module')
 def testClient():
-    app = temp.create_app()
+    app = create_app()
     app.debug = True
     return app.test_client()
+
+@pytest.fixture('module')
+def cursors():
+    DATABASE_PATH = 'database.db'
+    conn = sqlite3.connect(DATABASE_PATH)
+    print("yes connected")
+    yield conn
+    
 
 
 def test_registerGet(testClient):
     # print(testClient)
     res = testClient.get("/register")
+    print("yes")
     assert res.status_code == 200
     # assert res.result == "none" 
 
@@ -97,6 +106,34 @@ def test_LoginHistoryPost(testClient):
         print("error")
         assert True
         # The flow should enter exception block since admin check is missing and csrf token is not available, only admins can send a post request to login history
+
+# database test
+
+
+# tests user_info tables
+def test_userInfoCheck(cursors):
+    cur = cursors.cursor()
+    query = "select * from user_info"
+    cur.execute(query)
+    val = cur.fetchall()
+    assert len(val) > 0
+
+# tests user_access_log tables
+
+def test_userLogCheck(cursors):
+    cur = cursors.cursor()
+    query = "select * from user_access_log"
+    cur.execute(query)
+    val = cur.fetchall()
+    assert len(val) > 0
+
+# tests user_query tables
+def test_userQueryCheck(cursors):
+    cur = cursors.cursor()
+    query = "select * from user_query"
+    cur.execute(query)
+    val = cur.fetchall()
+    assert len(val) > 0
 
 
 # All test cases are passing
