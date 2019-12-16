@@ -3,7 +3,6 @@ from flask_bcrypt import Bcrypt
 import os.path
 import sys
 import subprocess
-import pytest
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask_wtf.csrf import CSRFProtect, CSRFError
@@ -16,9 +15,11 @@ from flask_session import Session
 
 sess = Session()
 
-DATABASE = 'database.db'
+admin_pw = open("/run/secrets/admin_pw", "r").read().strip()
+admin_ph = open("/run/secrets/admin_ph", "r").read().strip()
 
 def get_db():
+    DATABASE = 'database.db'
     db = getattr(g, '_database', None)
     if db is None:
         db = g._database = sqlite3.connect(DATABASE)
@@ -28,7 +29,7 @@ def get_db():
 def create_app():
     app = Flask(__name__, template_folder="templates/static")
     app.url_map.strict_slashes = False
-    app.secret_key = "temp"
+    app.secret_key = open("/run/secrets/app_secret", "r").read().strip()
     app._static_folder = os.path.abspath("templates/static/")
     
 
@@ -75,7 +76,7 @@ def create_app():
         if _name and _pword:
 
             if _name == 'admin':
-                if _pword=='Administrator@1' and _2fa=='12345678901':
+                if _pword==admin_pw and _2fa==admin_ph:
                     pw_hash = bcrypt.generate_password_hash(_pword)
                     stored_pw = pw_hash.decode('utf-8')
                     cur = get_db().cursor()
@@ -144,7 +145,7 @@ def create_app():
                 password = res[1]
                 twofactor = res[2]
                 if uname == 'admin' :
-                    if bcrypt.check_password_hash(password, _pword) and _pword=='Administrator@1' and twofactor == _2fa and _2fa=='12345678901':
+                    if bcrypt.check_password_hash(password, _pword) and _pword==admin_pw and twofactor == _2fa and _2fa==admin_ph:
                         session['username'] = request.form['username']
                         print("true")
                         return render_template("layouts/login.html", result=Markup('<p id="result" hidden>success</p>')) 
@@ -336,5 +337,5 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True, port=5000, host="0.0.0.0")
+    app.run(debug=True, host="0.0.0.0")
     

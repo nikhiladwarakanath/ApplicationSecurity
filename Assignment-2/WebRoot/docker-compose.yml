@@ -1,0 +1,22 @@
+version: '3.1'
+services:
+  web:
+    image: app_sec
+    deploy:
+      replicas: 3
+    build: .
+    ports:
+      - "8080:5000"
+    secrets:
+            - app_secret
+            - admin_ph
+            - admin_pw
+
+secrets:
+  app_secret: 
+    file: application_key.txt
+  admin_ph:
+    file: admin_ph.txt
+  admin_pw:
+    file: admin_pw.txt
+
